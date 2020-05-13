@@ -28,6 +28,9 @@ class ThunkBodyParser {
     }
 
     recieveChar(char) {
+        if (this.isFinished) {
+            return;
+        }
         if (this.currentState === this.state.WAITING_LENGTH) {
             if (char === '0') {
                 this.isFinished = true;
