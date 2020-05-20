@@ -15,17 +15,24 @@ function emit(token) {
         let element = {
             type: 'element',
             children: [],
-            attributes: []
+            attributes: [],
         };
 
         element.tagName = token.tagName;
         for (let p in token) {
-            if (p !== 'type' && p !== 'tagName') {
+            if (p !== 'type' &&
+                p !== 'tagName' &&
+                p !== 'isSelfClosing'
+            ) {
                 element.attributes.push({
                     name: p,
                     value: token[p]
                 });
             }
+        }
+
+        if (token.isSelfClosing) {
+            element.isSelfClosing = true;
         }
 
         top.children.push(element);
@@ -39,7 +46,7 @@ function emit(token) {
 
     } else if (token.type === 'endTag') {
         if (top.tagName !== token.tagName) {
-            throw new Error(`Tag start end doesn't match`);
+            throw new Error(`Tag start end doesn't match!`);
         } else {
             stack.pop();
         }
@@ -172,7 +179,7 @@ function afterAttributeName (c) {
 
 function beforeAttributeValue(c) {
     if (isBlank(c) || c === '/' || c === '>' || c === EOF) {
-
+        return beforeAttributeValue;
     } else if (c === '"') {
         return doubleQuotedAttributeValue;
     } else if (c === "'") {
@@ -250,22 +257,26 @@ function afterQuotedAttributeValue(c) {
 function selfClosingStartTag(c) {
     if (c === '>') {
         currentToken.isSelfClosing = true;
-        currentToken[currentAttribute.name] = currentAttribute.value;
+        if (currentAttribute !== null) {
+            currentToken[currentAttribute.name] = currentAttribute.value;
+        }
         emit(currentToken);
         return data;
     } else if (c === EOF) {
 
     } else {
-
+        throw new Error('unexpected-solidus-in-tag!');
     }
 }
 
 module.exports.parseHtml = function parseHtml(html) {
+    stack = [{ type: 'document', children: [] }];
     let state = data;
     for (let c of html) {
         state = state(c);
     }
     state === state(EOF);
-    console.log(stack[0])
+    
+    return stack[0];
 }
 
