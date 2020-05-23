@@ -43,6 +43,6 @@ void function test() {
     if (allPassed) {
         console.log('allPassed!');
     } else {
-        console.log(`notPassCount: ${nonPassCount}`);
+        console.log(`notPassCount: ${notPassCount}`);
     }
 }();
