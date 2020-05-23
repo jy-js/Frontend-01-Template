@@ -106,7 +106,8 @@ function endTagOpen(c) {
         }
         return tagName(c)
     } else if (c === '>') {
-
+        throw new Error('missing-end-tag-name parse error!');
+        return data;
     } else if (c === EOF) {
 
     } else {
