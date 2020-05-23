@@ -1,4 +1,5 @@
 const { isBlank, isLetter } = require('../utils');
+const { addCssRules, computeCss } = require('./css')
 
 const EOF = Symbol('EOF');
 
@@ -38,6 +39,8 @@ function emit(token) {
         top.children.push(element);
         element.parent = top;
 
+        computeCss(element);
+
         currentTextNode = null;
 
         if (!token.isSelfClosing) {
@@ -48,6 +51,9 @@ function emit(token) {
         if (top.tagName !== token.tagName) {
             throw new Error(`Tag start end doesn't match!`);
         } else {
+            if (top.tagName === 'style') {
+                addCssRules(top.children[0].content);
+            }
             stack.pop();
         }
         currentTextNode = null;

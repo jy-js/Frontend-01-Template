@@ -10,12 +10,16 @@ body div img{
     width:30px;
     background-color: #ff1111;
 }
+
+.circle {
+    border-radius: 50%;
+}
     </style>
 </head>
 <body>
     <div id="test">
         <img id="myid"/>
-        <img />
+        <img class="circle myclass1 myclass2" />
     </div>
 </body>
 </html>

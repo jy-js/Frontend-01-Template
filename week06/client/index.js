@@ -13,7 +13,8 @@ async function main() {
     });
 
     let response = await request.send();
-    parseHtml(response.body);
+    let dom = parseHtml(response.body);
+    // console.log(dom)
 }
 
 main();
