@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TicTacToe</title>
+    <style>
+        .container {
+            width: 100%;
+            height: 800px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        #checkerboard {
+            padding: 20px;
+            background-color: #FFBB00;
+        }
+
+        .cell {
+            width: 150px;
+            height: 150px;
+            display: inline-block;
+            border: solid 1px #000000;
+            vertical-align: middle;
+            line-height: 100px;
+            text-align: center;
+        }
+
+        .cell_container {
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .black_chess {
+            text-align: center;
+            background-color: #000000;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+        }
+
+        .white_chess {
+            text-align: center;
+            background-color: #FFFFFF;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+        }
+
+        .container .toolbar {
+            position: relative;
+            padding: 1em;
+            margin: 1em 0;
+            font-size: 16px;
+            text-align: center;
+        }
+
+        .container .toolbar .button {
+            margin: 0 0.25em 0 0;
+            padding: .78571429em 1.5em .78571429em;
+            display: inline-block;
+            cursor: pointer;
+            min-height: 1em;
+            outline: 0;
+            border: none;
+            vertical-align: baseline;
+            text-transform: none;
+            font-weight: 400;
+            line-height: 1em;
+            text-align: center;
+            border-radius: .14285714rem;
+            background-color: #FFBB00;
+            color: #fff;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div>
+            <h1>井字棋</h1>
+            <div id="result"></div>
+            <div id="checkerboard"></div>
+            <div class="toolbar">
+                <a class="button" id="restart">重新开始</a>
+                <a class="button" id="regret">悔棋</a>
+            </div>
+        </div>
+    </div>
+    <script>
+        let pattern = [
+            [0, 0, 0],
+            [0, 0, 0],
+            [0, 0, 0],
+        ];
+        let color = 1;
+        let previous = {};
+        let isOver = false;
+
+        const restart = document.getElementById("restart");
+        const regret = document.getElementById("regret");
+        restart.addEventListener("click", () => {
+            reStart();
+        });
+
+        function reStart() {
+            color = 1;
+            isOver = false;
+            pattern = [
+                [0, 0, 0],
+                [0, 0, 0],
+                [0, 0, 0],
+            ];
+            previous = {};
+            document.getElementById('result').innerText = "";
+            show();
+        }
+
+        regret.addEventListener("click", () => {
+            color = previous.color;
+            pattern[previous.y][previous.x] = 0;
+            pattern[previous.yy][previous.xx] = 0;
+            show();
+        })
+
+        function show() {
+            let checkerboard = document.getElementById("checkerboard");
+            checkerboard.innerHTML = "";
+            const BlackChess = '<div class="cell_container"><div class="black_chess"></div></div>';
+            const WhiteChess = '<div class="cell_container"><div class="white_chess"></div></div>';
+            for (let i = 0; i < 3; i++) {
+                for (let j = 0; j < 3; j++) {
+                    let cell = document.createElement("div");
+                    cell.classList.add("cell");
+                    cell.innerHTML = pattern[i][j] == 2 ? BlackChess :
+                        pattern[i][j] == 1 ? WhiteChess : "";
+                    cell.addEventListener("click", () => userMove(j, i));
+                    checkerboard.appendChild(cell);
+                }
+                checkerboard.appendChild(document.createElement("br"))
+            }
+        }
+
+        function userMove(x, y) {
+            if (isOver || pattern[y][x]) {
+                const c = confirm("本场游戏已经结束,是否重新开始");
+                if (c) {
+                    reStart();
+                };
+                return;
+            };
+            pattern[y][x] = color
+            if (check(pattern, color)) {
+                isOver = true
+                document.getElementById('result').innerText =
+                    color === 2 ? '黑棋胜利' :
+                    color === 1 ? '白棋胜利' :
+                    '系统错误';
+            }
+            color = 3 - color
+            previous = {
+                ...previous,
+                x,
+                y,
+                color
+            };
+            show()
+            if (!isOver)
+                setTimeout(() => computerMove(), 500)
+        }
+
+        function computerMove() {
+            let choice = bestChoice(pattern, color);
+            if (choice.point) {
+                pattern[choice.point[1]][choice.point[0]] = color;
+                previous = {
+                    ...previous,
+                    xx: choice.point[0],
+                    yy: choice.point[1],
+                    color
+                };
+            }
+
+            if (check(pattern, color)) {
+                isOver = true;
+                document.getElementById('result').innerText =
+                    color === 2 ? '黑棋胜利✌️' :
+                    color === 1 ? '白棋胜利✌️' :
+                    '';
+            }
+            color = 3 - color;
+            show();
+        }
+
+        function check(pattern, color) {
+            for (let i = 0; i < 3; i++) {
+                let win = true;
+                for (let j = 0; j < 3; j++) {
+                    if (pattern[i][j] !== color) {
+                        win = false;
+                        break;
+                    }
+                }
+                if (win) {
+                    return true;
+                }
+            }
+
+            for (let i = 0; i < 3; i++) {
+                let win = true;
+                for (let j = 0; j < 3; j++) {
+                    if (pattern[j][i] !== color) {
+                        win = false;
+                        break;
+                    }
+                }
+                if (win) {
+                    return true;
+                }
+            } {
+                let win = true;
+                for (let j = 0; j < 3; j++) {
+                    if (pattern[j][j] !== color) {
+                        win = false;
+                        break;
+                    }
+                }
+                if (win) {
+                    return true;
+                }
+            } {
+                let win = true;
+                for (let j = 0; j < 3; j++) {
+                    if (pattern[j][2 - j] !== color) {
+                        win = false;
+                        break;
+                    }
+                }
+                if (win) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function clone(pattern) {
+            return JSON.parse(JSON.stringify(pattern));
+        }
+
+        function willWin(pattern, color) {
+            for (let i = 0; i < 3; i++) {
+                for (let j = 0; j < 3; j++) {
+                    if (pattern[i][j] !== 0)
+                        continue;
+                    let tmp = clone(pattern);
+                    tmp[i][j] = color;
+                    if (check(tmp, color)) {
+                        return [j, i];
+                    }
+                }
+            }
+            return null;
+        }
+
+        function bestChoice(pattern, color) {
+            let point = willWin(pattern, color);
+            if (point) {
+                return {
+                    point,
+                    result: 1
+                };
+            }
+
+            let result = -1;
+            outer: for (let i = 0; i < 3; i++) {
+                for (let j = 0; j < 3; j++) {
+                    if (pattern[i][j] !== 0) {
+                        continue;
+                    }
+                    let tmp = clone(pattern);
+                    tmp[i][j] = color;
+                    let opp = bestChoice(tmp, 3 - color);
+                    const op = 0 - opp.result;
+                    if (op >= result) {
+                        point = [j, i];
+                        result = op;
+                    }
+                    if (result === 1) {
+                        break outer;
+                    }
+                }
+            }
+            return {
+                point,
+                result: point ? result : 0,
+            };
+        }
+        show();
+    </script>
+</body>
+
+</html>
