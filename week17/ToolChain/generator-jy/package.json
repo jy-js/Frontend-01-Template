@@ -1,0 +1,16 @@
+{
+  "name": "generator-jy",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "files": [
+    "app",
+    "router"
+  ],
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
